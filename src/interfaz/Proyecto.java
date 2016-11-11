@@ -45,6 +45,8 @@ import javax.swing.event.TableModelListener;
 
 public class Proyecto extends JFrame {
 
+	private JFrame oThis;
+	
 	private JPanel contentPane;
 
 	private JComboBox<String> comboBoxPrompt;
@@ -68,9 +70,9 @@ public class Proyecto extends JFrame {
 	private DefaultComboBoxModel<Cliente> combomodel_cliente, combomodel_clienteFiltro;
 
 	private JScrollPane scrollPane;
-	
+
 	private DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-	
+
 	private int idSeleccionadoVenta = -1;
 
 	/**
@@ -93,6 +95,7 @@ public class Proyecto extends JFrame {
 	 * Create the frame.
 	 */
 	public Proyecto() {
+		oThis = this;
 		setResizable(false);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,7 +105,7 @@ public class Proyecto extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		//prompt con un combo para elegir a qué base conectarse al principio
+		// prompt con un combo para elegir a qué base conectarse al principio
 		promptComboBox();
 
 		JLabel lblElegirSgbd = new JLabel("Cambiar SGBD:");
@@ -171,13 +174,13 @@ public class Proyecto extends JFrame {
 		panel.add(lblCantidad);
 
 		combo_cliente = new JComboBox();
-		combo_cliente.setModel(combomodel_cliente); //el modelo se carga al elegir la base de datos
+		combo_cliente.setModel(combomodel_cliente); // el modelo se carga al elegir la base de datos
 		combo_cliente.setBounds(10, 133, 255, 20);
 		panel.add(combo_cliente);
 
 		combo_producto = new JComboBox();
 		combo_producto.setBounds(10, 179, 255, 20);
-		combo_producto.setModel(combomodel_producto); //el modelo se carga al elegir la base de datos
+		combo_producto.setModel(combomodel_producto); // el modelo se carga al elegir la base de datos
 		panel.add(combo_producto);
 
 		JButton btn_aniadir = new JButton("A\u00F1adir nueva");
@@ -187,16 +190,16 @@ public class Proyecto extends JFrame {
 		JButton btn_borrar = new JButton("Borrar venta");
 		btn_borrar.setBounds(318, 376, 229, 55);
 		contentPane.add(btn_borrar);
-		
+
 		JComboBox combo_filtroClientes = new JComboBox();
-		combo_filtroClientes.setModel(combomodel_clienteFiltro); //el modelo se carga al elegir la base de datos
+		combo_filtroClientes.setModel(combomodel_clienteFiltro); // el modelo se carga al elegir la base de datos
 		combo_filtroClientes.setBounds(417, 137, 130, 20);
 		contentPane.add(combo_filtroClientes);
-		
+
 		JLabel lblFiltrarVentas = new JLabel("Filtrar ventas:");
 		lblFiltrarVentas.setBounds(306, 140, 101, 14);
 		contentPane.add(lblFiltrarVentas);
-		
+
 		// LISTENERS
 		comboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -204,11 +207,11 @@ public class Proyecto extends JFrame {
 				conectarSGBD();
 			}
 		});
-		
-		//ejercicio 3 - filtrar clientes por nombre
+
+		// ejercicio 3 - filtrar clientes por nombre
 		combo_filtroClientes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				cargarTabla((Cliente)combomodel_clienteFiltro.getSelectedItem());
+				cargarTabla((Cliente) combomodel_clienteFiltro.getSelectedItem());
 			}
 		});
 
@@ -225,22 +228,41 @@ public class Proyecto extends JFrame {
 		btn_aniadir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Venta v = new Venta();
-				try{
+				try {
 					v.setIdventa(Integer.parseInt(txt_idventa.getText().toString()));
 					v.setCantidad(Integer.parseInt(txt_cantidad.getText().toString()));
 					v.setFechaventa(formatter.parse(txt_fechaventa.getText().toString()));
 					System.out.println(combomodel_cliente.getSelectedItem());
 					Cliente c = (Cliente) combomodel_cliente.getSelectedItem();
 					v.setCliente(c);
-					Producto p = (Producto)combomodel_producto.getSelectedItem();
+					Producto p = (Producto) combomodel_producto.getSelectedItem();
 					v.setProducto(p);
-					
-					System.out.println(v.getIdventa());//TODO delete
-					
-					//Dao.insertarVenta(conn, v); //TODO
-					Ejercicio2.insertarVenta(conn, v);
-				} catch(NumberFormatException | ParseException ex){
-					//si no ha introducido algún dato bien
+
+					System.out.println(v.getIdventa());// TODO delete
+					/*
+					 * @return -1 - No se ha podido insertar la venta
+					 * 
+					 * @return 0 - Existe una venta con ese ID
+					 * 
+					 * @return 1 - Insertada la venta con éxito
+					 */
+					int resultado = Ejercicio2.insertarVenta(conn, v);
+					String mensaje = "";
+					switch (resultado) {
+					case -1:
+						mensaje = "Ha ocurrido un error al insertar la venta.";
+						break;
+					case 0:
+						mensaje = "Ya existe una venta con ese ID.";
+						break;
+					case 1:
+						mensaje = "Insertado con éxito.";
+						break;
+					}
+					JOptionPane.showMessageDialog(oThis, mensaje);
+
+				} catch (NumberFormatException | ParseException ex) {
+					// si no ha introducido algún dato bien
 					ex.printStackTrace();
 				}
 				cargarTabla();
@@ -248,18 +270,21 @@ public class Proyecto extends JFrame {
 		});
 		btn_borrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (idSeleccionadoVenta != -1){//valor por defecto cuando no hay ninguna seleccionada
-					Dao.borrarVenta(conn,idSeleccionadoVenta);
+				if (idSeleccionadoVenta != -1) {// valor por defecto cuando no hay ninguna seleccionada
+					Dao.borrarVenta(conn, idSeleccionadoVenta);
 				}
 				tablamodel.fireTableRowsDeleted(idSeleccionadoVenta, idSeleccionadoVenta);
 				cargarTabla();
 			}
 		});
-		tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-	        public void valueChanged(ListSelectionEvent event) {
-	        	idSeleccionadoVenta = (int) tabla.getValueAt(tabla.getSelectedRow(), 0);
-	        }
-	    });
+		tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent event) {
+				//el evento también saltaba al borrar filas y la fila borrada era -1
+				//saltaba nullPointerException
+				if (tabla.getSelectedRow() != -1)
+					idSeleccionadoVenta = (int) tabla.getValueAt(tabla.getSelectedRow(), 0);
+			}
+		});
 
 	}
 
@@ -268,30 +293,30 @@ public class Proyecto extends JFrame {
 	 */
 	private void cargarTabla() {
 		ArrayList<Venta> ventas = Dao.todasLasVentas(conn);
-		if (tablamodel != null){
+		if (tablamodel != null) {
 			tablamodel.setVentas(ventas);
-		}
-		else
+		} else
 			tablamodel = new ModeloTablaVentas(ventas);
-		//el modelo avisa a la tabla de que ha cambiado
-		//sin esto no cambia el número de filas de la tabla, aunque sí cambiaba los valores
+		// el modelo avisa a la tabla de que ha cambiado
+		// sin esto no cambia el número de filas de la tabla, aunque sí cambiaba los valores
 		tablamodel.fireTableDataChanged();
 	}
-	
+
 	private void cargarTabla(Cliente filtroCliente) {
-		ArrayList<Venta> ventas = Dao.todasLasVentas(conn,filtroCliente);
+		ArrayList<Venta> ventas = Dao.todasLasVentas(conn, filtroCliente);
 		if (tablamodel != null)
 			tablamodel.setVentas(ventas);
 		else
 			tablamodel = new ModeloTablaVentas(ventas);
-		//el modelo avisa a la tabla de que ha cambiado
-		//sin esto no cambia el número de filas de la tabla, aunque sí cambiaba los valores
+		// el modelo avisa a la tabla de que ha cambiado
+		// sin esto no cambia el número de filas de la tabla, aunque sí cambiaba los valores
 		tablamodel.fireTableDataChanged();
+		if (tablamodel.getColumnCount() >= 1)
+			tabla.setRowSelectionInterval(0, 0);
 	}
 
 	/**
-	 * carga el combo de clientes
-	 * si ya existía, lo borra y recarga
+	 * carga el combo de clientes si ya existía, lo borra y recarga
 	 */
 	private void comboClientes() {
 
@@ -299,16 +324,15 @@ public class Proyecto extends JFrame {
 
 		if (combomodel_cliente == null)
 			combomodel_cliente = new DefaultComboBoxModel<Cliente>();
-		
+
 		if (combomodel_clienteFiltro == null)
 			combomodel_clienteFiltro = new DefaultComboBoxModel<Cliente>();
-		
-		
+
 		combomodel_cliente.removeAllElements();
 		combomodel_clienteFiltro.removeAllElements();
-		
-		combomodel_clienteFiltro.addElement(null);//elemento en blanco para que aparezcan todos los clientes
-		
+
+		combomodel_clienteFiltro.addElement(null);// elemento en blanco para que aparezcan todos los clientes
+
 		for (Cliente c : clientes) {
 			combomodel_clienteFiltro.addElement(c);
 			combomodel_cliente.addElement(c);
@@ -316,21 +340,19 @@ public class Proyecto extends JFrame {
 	}
 
 	/**
-	 * carga el combo de productos
-	 * si ya existía, lo borra y recarga
+	 * carga el combo de productos si ya existía, lo borra y recarga
 	 */
 	private void comboProductos() {
-		
+
 		ArrayList<Producto> productos = Dao.todosLosProductos(conn);
 
-		
 		if (combomodel_producto == null)
 			combomodel_producto = new DefaultComboBoxModel<Producto>();
-		
+
 		for (Producto p : productos) {
 			combomodel_producto.addElement(p);
 		}
-		
+
 	}
 
 	/**

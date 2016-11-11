@@ -262,14 +262,17 @@ public class Dao {
 		return productos;
 	}
 
+	/**
+	 * Inserta una venta
+	 * NO COMPRUEBA que exista (sql por medio de claves sí). Para comprobar usar existeVentaId()
+	 * 
+	 * @param conn
+	 * @param v
+	 * @return
+	 */
 	public static boolean insertarVenta(Connection conn, Venta v) {
 
 		int count = 0;
-		
-		if (existeVentaId(conn,v.getIdventa())){
-			System.out.println("Ya existe una venta con ese id.");
-			return false;
-		}
 		
 		String sql = "INSERT INTO ventas (idventa, fechaventa, idcliente, idproducto, cantidad) VALUES (?,?,?,?,?)";
 
@@ -300,6 +303,7 @@ public class Dao {
 		return count == 1;
 	}
 	
+	
 	public static boolean existeVentaId(Connection conn, int idventa){
 		String sql = "SELECT idventa FROM ventas WHERE idventa = " + idventa;
 		Statement stmt = null;
@@ -327,11 +331,6 @@ public class Dao {
 			}
 		}
 		return false;
-	}
-
-	public static boolean aniadirProductoAVentaExistente(Venta v) {
-		// TODO Auto-generated method stub
-		return true;
 	}
 
 	public static boolean borrarVenta(Connection conn, int idVenta) {
