@@ -1,0 +1,65 @@
+<clientes>
+	<cliente>
+		<nombre>Construcciones Pepe</nombre>
+		<direccion>calle 1</direccion>
+		<poblacion>Vitoria</poblacion>
+		<telef>945111111</telef>
+		<nif>11111111A</nif>
+	</cliente>
+	<cliente>
+		<nombre>Reparaciones Manolo</nombre>
+		<direccion>plaza 2</direccion>
+		<poblacion>Bilbao</poblacion>
+		<telef>944444444</telef>
+		<nif>22222222B</nif>
+	</cliente>
+	<cliente>
+		<nombre>Bicicletas Juan</nombre>
+		<direccion>paseo 3</direccion>
+		<poblacion>Santander</poblacion>
+		<telef>91151515</telef>
+		<nif>33333333C</nif>
+	</cliente>
+	<cliente>
+		<nombre>Construcciones Urrutia</nombre>
+		<direccion>calle 4</direccion>
+		<poblacion>Burgos</poblacion>
+		<telef>975373737</telef>
+		<nif>44444444D</nif>
+	</cliente>
+	<cliente>
+		<nombre>Ikea</nombre>
+		<direccion>calle 5</direccion>
+		<poblacion>Oviedo</poblacion>
+		<telef>987232323</telef>
+		<nif>55555555E</nif>
+	</cliente>
+	<cliente>
+		<nombre>Carpinteria Bea</nombre>
+		<direccion>paseo 6</direccion>
+		<poblacion>Huesca</poblacion>
+		<telef>656141414</telef>
+		<nif>66666666F</nif>
+	</cliente>
+	<cliente>
+		<nombre>Ciudad Jardin</nombre>
+		<direccion>calle 7</direccion>
+		<poblacion>Valladolid</poblacion>
+		<telef>983717171</telef>
+		<nif>77777777G</nif>
+	</cliente>
+	<cliente>
+		<nombre>Construcciones Pepito</nombre>
+		<direccion>plaza 8</direccion>
+		<poblacion>Palencia</poblacion>
+		<telef>986252525</telef>
+		<nif>88888888H</nif>
+	</cliente>
+	<cliente>
+		<nombre>Carpinteria Maria</nombre>
+		<direccion>paseo 9</direccion>
+		<poblacion>Vigo</poblacion>
+		<telef>971696969</telef>
+		<nif>99999999I</nif>
+	</cliente>
+</clientes>
