@@ -246,7 +246,7 @@ public class Dao {
 	public static ArrayList<Producto> todosLosProductos(Connection conn) {
 		ArrayList<Producto> productos = new ArrayList<Producto>();
 
-		String sql = "SELECT id, descripcion, stockactual, stockminimo, pvp " + "FROM productos";
+		String sql = "SELECT id, descripcion, stockactual, stockminimo, pvp FROM productos";
 		Statement stmt;
 		try {
 			stmt = conn.createStatement();
@@ -273,6 +273,10 @@ public class Dao {
 	public static boolean insertarVenta(Connection conn, Venta v) {
 
 		int count = 0;
+		if (!hayStockSuficiente(conn, v.getCantidad(),v.getProducto().getId()))
+			return false;
+		
+		actualizarStock(conn, v.getCantidad(),v.getProducto().getId());
 		
 		String sql = "INSERT INTO ventas (idventa, fechaventa, idcliente, idproducto, cantidad) VALUES (?,?,?,?,?)";
 
@@ -303,7 +307,64 @@ public class Dao {
 		return count == 1;
 	}
 	
-	
+	//TODO comprobar que funciona, primero hay que arreglar hayStockSuficiente
+	private static void actualizarStock(Connection conn, int cantidad, int id) {
+		String sql = "UPDATE productos SET stockactual = stockactual - ? WHERE id = ?";
+
+		PreparedStatement pstmt = null;
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, cantidad);
+			pstmt.setInt(2, id);
+			
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			System.err.println("ERROR - al hacer la consulta sql: " + sql);
+			e.printStackTrace();
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	//FIXME da error
+	private static boolean hayStockSuficiente(Connection conn, int cantidad, int idproducto) {
+
+		String sql = "SELECT stockactual FROM productos WHERE id = ?";
+		int stock = -1;
+
+		PreparedStatement pstmt = null;
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, idproducto);
+
+			ResultSet rs = pstmt.executeQuery(sql);
+			while (rs.next()) {
+				stock = rs.getInt(0);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("ERROR - al hacer la consulta sql: " + sql);
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return stock > cantidad;
+	}
+
 	public static boolean existeVentaId(Connection conn, int idventa){
 		String sql = "SELECT idventa FROM ventas WHERE idventa = " + idventa;
 		Statement stmt = null;
