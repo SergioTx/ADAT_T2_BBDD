@@ -46,7 +46,7 @@ import javax.swing.event.TableModelListener;
 public class Proyecto extends JFrame {
 
 	private JFrame oThis;
-	
+
 	private JPanel contentPane;
 
 	private JComboBox<String> comboBoxPrompt;
@@ -59,7 +59,6 @@ public class Proyecto extends JFrame {
 	private JButton btn_importarProductos;
 	private JTable tabla;
 	private JTextField txt_idventa;
-	private JTextField txt_fechaventa;
 	private JTextField txt_cantidad;
 
 	private ModeloTablaVentas tablamodel;
@@ -99,7 +98,7 @@ public class Proyecto extends JFrame {
 		setResizable(false);
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 573, 471);
+		setBounds(100, 100, 573, 437);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -134,61 +133,52 @@ public class Proyecto extends JFrame {
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new TitledBorder(null, "Venta", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.setBounds(10, 172, 275, 259);
+		panel.setBounds(10, 168, 275, 223);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
 		JLabel lblIdventa = new JLabel("IdVenta");
-		lblIdventa.setBounds(10, 26, 255, 14);
+		lblIdventa.setBounds(10, 24, 255, 14);
 		panel.add(lblIdventa);
 
 		txt_idventa = new JTextField();
-		txt_idventa.setBounds(10, 41, 255, 20);
+		txt_idventa.setBounds(10, 49, 255, 20);
 		panel.add(txt_idventa);
 		txt_idventa.setColumns(10);
 
-		txt_fechaventa = new JTextField();
-		txt_fechaventa.setColumns(10);
-		txt_fechaventa.setBounds(10, 87, 255, 20);
-		panel.add(txt_fechaventa);
-
-		JLabel lblFechaventa = new JLabel("FechaVenta");
-		lblFechaventa.setBounds(10, 72, 255, 14);
-		panel.add(lblFechaventa);
-
 		JLabel lblCliente = new JLabel("Cliente");
-		lblCliente.setBounds(10, 118, 255, 14);
+		lblCliente.setBounds(10, 80, 255, 14);
 		panel.add(lblCliente);
 
 		JLabel lblProducto = new JLabel("Producto");
-		lblProducto.setBounds(10, 164, 255, 14);
+		lblProducto.setBounds(10, 126, 255, 14);
 		panel.add(lblProducto);
 
 		txt_cantidad = new JTextField();
 		txt_cantidad.setColumns(10);
-		txt_cantidad.setBounds(10, 225, 255, 20);
+		txt_cantidad.setBounds(10, 187, 255, 20);
 		panel.add(txt_cantidad);
 
 		JLabel lblCantidad = new JLabel("Cantidad");
-		lblCantidad.setBounds(10, 210, 255, 14);
+		lblCantidad.setBounds(10, 172, 255, 14);
 		panel.add(lblCantidad);
 
 		combo_cliente = new JComboBox();
 		combo_cliente.setModel(combomodel_cliente); // el modelo se carga al elegir la base de datos
-		combo_cliente.setBounds(10, 133, 255, 20);
+		combo_cliente.setBounds(10, 95, 255, 20);
 		panel.add(combo_cliente);
 
 		combo_producto = new JComboBox();
-		combo_producto.setBounds(10, 179, 255, 20);
+		combo_producto.setBounds(10, 141, 255, 20);
 		combo_producto.setModel(combomodel_producto); // el modelo se carga al elegir la base de datos
 		panel.add(combo_producto);
 
 		JButton btn_aniadir = new JButton("A\u00F1adir nueva");
-		btn_aniadir.setBounds(318, 310, 229, 55);
+		btn_aniadir.setBounds(318, 270, 229, 55);
 		contentPane.add(btn_aniadir);
 
-		JButton btn_borrar = new JButton("Borrar venta");
-		btn_borrar.setBounds(318, 376, 229, 55);
+		JButton btn_borrar = new JButton("Borrar venta seleccionada");
+		btn_borrar.setBounds(318, 336, 229, 55);
 		contentPane.add(btn_borrar);
 
 		JComboBox combo_filtroClientes = new JComboBox();
@@ -231,39 +221,41 @@ public class Proyecto extends JFrame {
 				try {
 					v.setIdventa(Integer.parseInt(txt_idventa.getText().toString()));
 					v.setCantidad(Integer.parseInt(txt_cantidad.getText().toString()));
-					v.setFechaventa(formatter.parse(txt_fechaventa.getText().toString()));
-					System.out.println(combomodel_cliente.getSelectedItem());
+					v.setFechaventa(new java.util.Date());
 					Cliente c = (Cliente) combomodel_cliente.getSelectedItem();
 					v.setCliente(c);
 					Producto p = (Producto) combomodel_producto.getSelectedItem();
 					v.setProducto(p);
 
-					System.out.println(v.getIdventa());// TODO delete
-					/*
-					 * @return -1 - No se ha podido insertar la venta
-					 * 
-					 * @return 0 - Existe una venta con ese ID
-					 * 
-					 * @return 1 - Insertada la venta con éxito
-					 */
-					int resultado = Ejercicio2.insertarVenta(conn, v);
-					String mensaje = "";
-					switch (resultado) {
-					case -1:
-						mensaje = "Ha ocurrido un error al insertar la venta.";
-						break;
-					case 0:
-						mensaje = "Ya existe una venta con ese ID.";
-						break;
-					case 1:
-						mensaje = "Insertado con éxito.";
-						break;
+					if (v.getIdventa() <= 0)
+						JOptionPane.showMessageDialog(oThis, "La cantidad no puede ser negativa");
+					else {
+						/*
+						 * @return -1 - No se ha podido insertar la venta
+						 * 
+						 * @return 0 - Existe una venta con ese ID
+						 * 
+						 * @return 1 - Insertada la venta con éxito
+						 */
+						int resultado = Ejercicio2.insertarVenta(conn, v);
+						String mensaje = "";
+						switch (resultado) {
+						case -1:
+							mensaje = "Ha ocurrido un error al insertar la venta.";
+							break;
+						case 0:
+							mensaje = "Ya existe una venta con ese ID.";
+							break;
+						case 1:
+							mensaje = "Insertado con éxito.";
+							break;
+						}
+						JOptionPane.showMessageDialog(oThis, mensaje);
 					}
-					JOptionPane.showMessageDialog(oThis, mensaje);
 
-				} catch (NumberFormatException | ParseException ex) {
+				} catch (NumberFormatException ex) {
 					// si no ha introducido algún dato bien
-					ex.printStackTrace();
+					JOptionPane.showMessageDialog(oThis, "Por favor, rellene bien los campos");
 				}
 				cargarTabla();
 			}
@@ -279,8 +271,8 @@ public class Proyecto extends JFrame {
 		});
 		tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
-				//el evento también saltaba al borrar filas y la fila borrada era -1
-				//saltaba nullPointerException
+				// el evento también saltaba al borrar filas y la fila borrada era -1
+				// saltaba nullPointerException
 				if (tabla.getSelectedRow() != -1)
 					idSeleccionadoVenta = (int) tabla.getValueAt(tabla.getSelectedRow(), 0);
 			}
@@ -371,7 +363,7 @@ public class Proyecto extends JFrame {
 	}
 
 	private void conectarSGBD() {
-		System.out.println("conectarSGBD()"); // TODO delete
+		System.out.println("conectarSGBD()"); // TODO delete log
 
 		// si existía una conexión, la cerramos antes de abrir otra
 		if (conn != null) {
@@ -382,18 +374,18 @@ public class Proyecto extends JFrame {
 			}
 		}
 
-		switch (dbElegida) {
-		case "MySql":
+		switch (dbElegida.toLowerCase()) {
+		case "mysql":
 			conn = Dao.getMysqlConnection();
 			break;
-		case "SQLite":
+		case "sqlite":
 			conn = Dao.getSqliteConnection();
 			break;
-		case "":
+		case "db4o":
 			conn = Dao.getMysqlConnection(); // TODO change
 			break;
 		}
-		System.out.println("Cambiando...");
+		System.out.println("Cambiando..."); //TODO delete log
 		comboClientes();
 		comboProductos();
 		cargarTabla();

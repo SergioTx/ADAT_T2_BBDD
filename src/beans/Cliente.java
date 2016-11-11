@@ -1,10 +1,5 @@
 package beans;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement
 public class Cliente {
 
 	private int id;
@@ -27,7 +22,7 @@ public class Cliente {
 	public int getId() {
 		return id;
 	}
-	@XmlElement
+
 	public void setId(int id) {
 		this.id = id;
 	}
@@ -35,7 +30,7 @@ public class Cliente {
 	public String getNombre() {
 		return nombre;
 	}
-	@XmlElement
+
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
@@ -43,7 +38,7 @@ public class Cliente {
 	public String getDireccion() {
 		return direccion;
 	}
-	@XmlElement
+
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
 	}
@@ -51,7 +46,7 @@ public class Cliente {
 	public String getPoblacion() {
 		return poblacion;
 	}
-	@XmlElement
+
 	public void setPoblacion(String poblacion) {
 		this.poblacion = poblacion;
 	}
@@ -59,7 +54,7 @@ public class Cliente {
 	public String getTelef() {
 		return telef;
 	}
-	@XmlElement
+
 	public void setTelef(String telef) {
 		this.telef = telef;
 	}
@@ -67,14 +62,14 @@ public class Cliente {
 	public String getNif() {
 		return nif;
 	}
-	@XmlElement
+
 	public void setNif(String nif) {
 		this.nif = nif;
 	}
 
 	@Override
 	public String toString() {
-		return nombre;
+		return nombre + " (id:" + id + ")";
 	}
 
 }
