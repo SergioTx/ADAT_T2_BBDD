@@ -32,6 +32,7 @@ public class ModeloTablaVentas extends AbstractTableModel {
 	public Object getValueAt(int row, int col) {
 		DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 		Venta venta = ventas.get(row);
+				
 		switch (col) {
 		case 0:
 			return venta.getIdventa();

@@ -4,19 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 
-import org.sqlite.SQLiteDataSource;
-
-import java.sql.SQLException;
-
-import com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.sqlite.SQLiteDataSource;
 
 import beans.Cliente;
 import beans.Producto;
@@ -24,6 +21,8 @@ import beans.Venta;
 import proyecto.Utils;
 
 public class Dao {
+	
+	private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	public static Connection getMysqlConnection() {
 
@@ -116,65 +115,21 @@ public class Dao {
 		return (count == 0) ? false : true;
 	}
 
-	public static ArrayList<Venta> todasLasVentas(Connection conn) {
-		ArrayList<Venta> ventas = new ArrayList<Venta>();
-
-		String sql = "SELECT idventa, fechaventa, cantidad, idcliente, idproducto, "
-				+ "clientes.nombre, clientes.direccion, clientes.poblacion, clientes.telef, clientes.nif, productos.id, "
-				+ "productos.descripcion, productos.stockactual, productos.stockminimo, productos.pvp " + "FROM ventas, clientes, productos "
-				+ "WHERE ventas.idcliente = clientes.id " + "AND ventas.idproducto = productos.id";
-
-		Statement stmt;
-		try {
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(sql);
-			while (rs.next()) {
-
-				Venta v;
-				Cliente c = new Cliente();
-				Producto p = new Producto();
-				c.setId(rs.getInt("idcliente"));
-				c.setNombre(rs.getString("nombre"));
-				c.setDireccion(rs.getString("direccion"));
-				c.setPoblacion(rs.getString("poblacion"));
-				c.setTelef(rs.getString("telef"));
-				c.setNif(rs.getString("nif"));
-
-				p.setId(rs.getInt("idproducto"));
-				p.setDescripcion(rs.getString("descripcion"));
-				p.setStockactual(rs.getInt("stockactual"));
-				p.setStockminimo(rs.getInt("stockminimo"));
-				p.setPvp(rs.getDouble("pvp"));
-
-				if (conn.toString().toLowerCase().contains("sqlite")) {
-					DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-					Date date = null;
-					try {
-						date = formatter.parse(rs.getString(2));
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-
-					v = new Venta(rs.getInt(1), date, c, p, rs.getInt(4));
-				} else {
-					v = new Venta(rs.getInt(1), new java.util.Date(rs.getDate(2).getTime()), c, p, rs.getInt(4));
-				}
-				ventas.add(v);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-		return ventas;
-	}
-
+	/**
+	 * 
+	 * @param conn
+	 * @param filtroCliente Si no se quiere aplicar filtro, pasar null
+	 * @return
+	 */
 	public static ArrayList<Venta> todasLasVentas(Connection conn, Cliente filtroCliente) {
 		ArrayList<Venta> ventas = new ArrayList<Venta>();
 
 		String sql = "SELECT idventa, fechaventa, cantidad, idcliente, idproducto, "
 				+ "clientes.nombre, clientes.direccion, clientes.poblacion, clientes.telef, clientes.nif, productos.id, "
-				+ "productos.descripcion, productos.stockactual, productos.stockminimo, productos.pvp " + "FROM ventas, clientes, productos "
-				+ "WHERE ventas.idcliente = clientes.id " + "AND ventas.idproducto = productos.id";
+				+ "productos.descripcion, productos.stockactual, productos.stockminimo, productos.pvp "
+				+ "FROM ventas, clientes, productos " + "WHERE ventas.idcliente = clientes.id "
+				+ "AND ventas.idproducto = productos.id";
+		
 		if (filtroCliente != null)
 			sql += " AND ventas.idcliente = " + filtroCliente.getId();
 
@@ -209,9 +164,9 @@ public class Dao {
 						e.printStackTrace();
 					}
 
-					v = new Venta(rs.getInt(1), date, c, p, rs.getInt(4));
+					v = new Venta(rs.getInt("idventa"), date, c, p, rs.getInt("cantidad"));
 				} else {
-					v = new Venta(rs.getInt(1), new java.util.Date(rs.getDate(2).getTime()), c, p, rs.getInt(4));
+					v = new Venta(rs.getInt("idventa"), new java.util.Date(rs.getDate(2).getTime()), c, p, rs.getInt("cantidad"));
 				}
 				ventas.add(v);
 			}
@@ -225,15 +180,14 @@ public class Dao {
 	public static ArrayList<Cliente> todosLosClientes(Connection conn) {
 		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
 
-		String sql = "SELECT id, nombre, direccion, poblacion, telef, nif " 
-		+ "FROM clientes "
-		+ "ORDER BY nombre";
+		String sql = "SELECT id, nombre, direccion, poblacion, telef, nif " + "FROM clientes " + "ORDER BY nombre";
 		Statement stmt;
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Cliente c = new Cliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6));
+				Cliente c = new Cliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
+						rs.getString(5), rs.getString(6));
 				clientes.add(c);
 			}
 		} catch (SQLException e) {
@@ -263,8 +217,8 @@ public class Dao {
 	}
 
 	/**
-	 * Inserta una venta
-	 * NO COMPRUEBA que exista (sql por medio de claves sí). Para comprobar usar existeVentaId()
+	 * Inserta una venta NO COMPRUEBA que exista (sql por medio de claves sí).
+	 * Para comprobar usar existeVentaId()
 	 * 
 	 * @param conn
 	 * @param v
@@ -273,11 +227,11 @@ public class Dao {
 	public static boolean insertarVenta(Connection conn, Venta v) {
 
 		int count = 0;
-		if (!hayStockSuficiente(conn, v.getCantidad(),v.getProducto().getId()))
+		if (!hayStockSuficiente(conn, v.getCantidad(), v.getProducto().getId()))
 			return false;
-		
-		actualizarStock(conn, v.getCantidad(),v.getProducto().getId());
-		
+
+		actualizarStock(conn, v.getCantidad(), v.getProducto().getId());
+
 		String sql = "INSERT INTO ventas (idventa, fechaventa, idcliente, idproducto, cantidad) VALUES (?,?,?,?,?)";
 
 		PreparedStatement pstmt = null;
@@ -285,11 +239,16 @@ public class Dao {
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, v.getIdventa());
-			pstmt.setDate(2, new java.sql.Date(v.getFechaventa().getTime()));
+			if (conn.toString().toLowerCase().contains("sqlite")){
+				pstmt.setString(2, formatter.format(new Date()));
+			} else {
+				pstmt.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
+			}
+			
 			pstmt.setInt(3, v.getCliente().getId());
 			pstmt.setInt(4, v.getProducto().getId());
 			pstmt.setInt(5, v.getCantidad());
-
+			
 			count = pstmt.executeUpdate();
 
 		} catch (SQLException e) {
@@ -306,8 +265,7 @@ public class Dao {
 
 		return count == 1;
 	}
-	
-	//TODO comprobar que funciona, primero hay que arreglar hayStockSuficiente
+
 	private static void actualizarStock(Connection conn, int cantidad, int id) {
 		String sql = "UPDATE productos SET stockactual = stockactual - ? WHERE id = ?";
 
@@ -317,7 +275,7 @@ public class Dao {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, cantidad);
 			pstmt.setInt(2, id);
-			
+
 			pstmt.executeUpdate();
 
 		} catch (SQLException e) {
@@ -330,10 +288,9 @@ public class Dao {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
-	//FIXME da error
 	private static boolean hayStockSuficiente(Connection conn, int cantidad, int idproducto) {
 
 		String sql = "SELECT stockactual FROM productos WHERE id = ?";
@@ -345,9 +302,9 @@ public class Dao {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, idproducto);
 
-			ResultSet rs = pstmt.executeQuery(sql);
+			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
-				stock = rs.getInt(0);
+				stock = rs.getInt(1);
 			}
 
 		} catch (SQLException e) {
@@ -365,7 +322,7 @@ public class Dao {
 		return stock > cantidad;
 	}
 
-	public static boolean existeVentaId(Connection conn, int idventa){
+	public static boolean existeVentaId(Connection conn, int idventa) {
 		String sql = "SELECT idventa FROM ventas WHERE idventa = " + idventa;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -373,13 +330,13 @@ public class Dao {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery(sql);
 			if (rs.next()) {
-				//si ya existe, vuelve
+				// si ya existe, vuelve
 				return true;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return true; //ERROR
-		} finally{ //cerrar los statement
+			return true; // ERROR
+		} finally { // cerrar los statement
 			try {
 				stmt.close();
 			} catch (SQLException e) {
@@ -394,6 +351,7 @@ public class Dao {
 		return false;
 	}
 
+	//TODO falta actualizar el stock si se borra una venta
 	public static boolean borrarVenta(Connection conn, int idVenta) {
 		int count = 0;
 		String sql = "DELETE FROM ventas WHERE idventa = ?";
@@ -421,5 +379,5 @@ public class Dao {
 			return false;
 		return true;
 	}
-	
+
 }

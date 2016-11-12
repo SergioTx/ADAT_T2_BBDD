@@ -11,6 +11,10 @@ public class Utils {
 	
 	public static final String SQLITE_DB = "sqlite/ejercicio1.db";
 	
+	public static final String SQLITE = "SQLite";
+	public static final String MYSQL = "MySQL";
+	public static final String DB4O = "DB4O";
+	
 	protected static int leerInt() throws IOException{
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String str = String.valueOf(in.readLine());
