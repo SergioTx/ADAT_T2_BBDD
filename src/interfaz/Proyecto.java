@@ -117,6 +117,7 @@ public class Proyecto extends JFrame {
 		// prompt con un combo para elegir a qué base conectarse al principio
 		promptComboBox();
 		
+		//TODO delete
 		if (cont != null){
 			Ejercicio1.insertarClientes(cont);
 			Ejercicio1.insertarProductos(cont);
