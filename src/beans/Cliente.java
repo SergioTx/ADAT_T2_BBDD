@@ -6,7 +6,6 @@ public class Cliente {
 	private String nombre, direccion, poblacion, telef, nif;
 
 	public Cliente() {
-
 	}
 
 	public Cliente(int id, String nombre, String direccion, String poblacion, String telef, String nif) {

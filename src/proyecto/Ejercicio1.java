@@ -22,6 +22,8 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import com.db4o.ObjectContainer;
+
 import beans.Cliente;
 import beans.Producto;
 import dao.Dao;
@@ -120,5 +122,24 @@ public class Ejercicio1 {
 		}
 
 		return productos;
+	}
+
+	//DB4O
+	//TODO all methods
+	public static void insertarProductos(ObjectContainer cont) {
+		ArrayList<Producto> productos = leerProductos();
+		for (Producto producto : productos) {
+			System.out.println(producto.toString());
+			cont.store(producto);
+		}
+	}
+
+	public static void insertarClientes(ObjectContainer cont) {
+		// TODO Auto-generated method stub
+		ArrayList<Cliente> clientes = leerClientes();
+		for (Cliente cliente : clientes) {
+			System.out.println(cliente.toString());
+			cont.store(cliente);
+		}
 	}
 }

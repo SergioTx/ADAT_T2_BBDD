@@ -1,6 +1,7 @@
 package dao;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -11,9 +12,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 
+import com.db4o.ObjectContainer;
+import com.db4o.ObjectSet;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.sqlite.SQLiteDataSource;
+import com.db4o.Db4oEmbedded;
+import com.db4o.ObjectContainer;
 
 import beans.Cliente;
 import beans.Producto;
@@ -60,6 +66,14 @@ public class Dao {
 		}
 
 		return conn;
+	}
+	
+	public static ObjectContainer getDB4OContainer(){
+		ObjectContainer container = null;
+		
+		container = Db4oEmbedded.openFile(Utils.DB4O_DB);
+		
+		return container;
 	}
 
 	/**
@@ -378,6 +392,43 @@ public class Dao {
 		if (count == 0)
 			return false;
 		return true;
+	}
+
+	
+	/*
+	 * DB4O
+	 * Mismas funciones pero reciben el ObjectContainer en lugar de Connection
+	 */
+	public static void borrarVenta(ObjectContainer cont, int idSeleccionadoVenta) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static ArrayList<Venta> todasLasVentas(ObjectContainer cont, Cliente filtroCliente) {
+		ArrayList<Venta> ventas = null;
+		ObjectSet<Venta> set = cont.queryByExample(new Venta()); 
+		while(set.hasNext()){
+			ventas.add(set.next());
+		}
+		return ventas;
+	}
+
+	public static ArrayList<Cliente> todosLosClientes(ObjectContainer cont) {
+		ArrayList<Cliente> clientes = null;
+		ObjectSet<Cliente> set = cont.queryByExample(new Cliente()); 
+		while(set.hasNext()){
+			clientes.add(set.next());
+		}
+		return clientes;
+	}
+
+	public static ArrayList<Producto> todosLosProductos(ObjectContainer cont) {
+		ArrayList<Producto> productos = null;
+		ObjectSet<Producto> set = cont.queryByExample(new Producto()); 
+		while(set.hasNext()){
+			productos.add(set.next());
+		}
+		return productos;
 	}
 
 }

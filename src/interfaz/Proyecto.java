@@ -23,6 +23,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.db4o.ObjectContainer;
+
 import beans.Cliente;
 import beans.Producto;
 import beans.Venta;
@@ -46,6 +48,7 @@ public class Proyecto extends JFrame {
 	private JComboBox<String> comboBox;
 
 	private Connection conn;
+	private ObjectContainer cont;
 
 	private String dbElegida;
 	private String[] dbs = { Utils.MYSQL, Utils.SQLITE, Utils.DB4O };
@@ -113,6 +116,12 @@ public class Proyecto extends JFrame {
 		
 		// prompt con un combo para elegir a qué base conectarse al principio
 		promptComboBox();
+		
+		if (cont != null){
+			Ejercicio1.insertarClientes(cont);
+			Ejercicio1.insertarProductos(cont);
+		}
+		
 
 		JLabel lblElegirSgbd = new JLabel("Cambiar SGBD:");
 		lblElegirSgbd.setBounds(10, 11, 92, 14);
@@ -207,12 +216,18 @@ public class Proyecto extends JFrame {
 
 		btn_importarProductos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Ejercicio1.insertarProductos(conn);
+				if (conn == null && cont != null)
+					Ejercicio1.insertarProductos(cont);
+				else
+					Ejercicio1.insertarProductos(conn);
 			}
 		});
 		btn_importarClientes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Ejercicio1.insertarClientes(conn);
+				if (conn == null && cont != null)
+					Ejercicio1.insertarClientes(cont);
+				else
+					Ejercicio1.insertarClientes(conn);
 			}
 		});
 		btn_aniadir.addActionListener(new ActionListener() {
@@ -237,7 +252,12 @@ public class Proyecto extends JFrame {
 						 * 
 						 * @return 1 - Insertada la venta con éxito
 						 */
-						int resultado = Ejercicio2.insertarVenta(conn, v);
+						int resultado;
+						if (conn == null && cont != null)
+							resultado = Ejercicio2.insertarVenta(cont, v);
+						else
+							resultado = Ejercicio2.insertarVenta(conn, v);
+						
 						String mensaje = "";
 						switch (resultado) {
 						case -1:
@@ -263,7 +283,10 @@ public class Proyecto extends JFrame {
 		btn_borrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (idSeleccionadoVenta != -1) {// valor por defecto cuando no hay ninguna seleccionada
-					Dao.borrarVenta(conn, idSeleccionadoVenta);
+					if (conn == null && cont != null)
+						Dao.borrarVenta(cont, idSeleccionadoVenta);
+					else
+						Dao.borrarVenta(conn, idSeleccionadoVenta);
 				}
 				tablamodel.fireTableRowsDeleted(idSeleccionadoVenta, idSeleccionadoVenta);
 				cargarTabla(filtroCliente);
@@ -284,11 +307,15 @@ public class Proyecto extends JFrame {
 	 * carga el modelo de la tabla
 	 */
 	private void cargarTabla(Cliente filtroCliente) {
-		ArrayList<Venta> ventas = Dao.todasLasVentas(conn, filtroCliente);
+		ArrayList<Venta> ventas = null;
+		if (conn == null && cont != null)
+			ventas = Dao.todasLasVentas(cont, filtroCliente);
+		else
+			ventas = Dao.todasLasVentas(conn, filtroCliente);
 		
 		//si el botón existe, se dehabilita si no hay elementos en la tabla
 		if (btn_borrar != null){
-			if (ventas.size() <= 0){
+			if (ventas != null && ventas.size() <= 0){
 				btn_borrar.setEnabled(false);
 			} else {
 				btn_borrar.setEnabled(true);
@@ -308,8 +335,11 @@ public class Proyecto extends JFrame {
 	 * carga el combo de clientes si ya existía, lo borra y recarga
 	 */
 	private void comboClientes() {
-
-		ArrayList<Cliente> clientes = Dao.todosLosClientes(conn);
+		ArrayList<Cliente> clientes = null;
+		if (conn == null && cont != null)
+			clientes = Dao.todosLosClientes(cont);
+		else
+			clientes = Dao.todosLosClientes(conn);
 
 		if (combomodel_cliente == null)
 			combomodel_cliente = new DefaultComboBoxModel<Cliente>();
@@ -322,9 +352,11 @@ public class Proyecto extends JFrame {
 
 		combomodel_clienteFiltro.addElement(null);// elemento en blanco para que aparezcan todos los clientes
 
-		for (Cliente c : clientes) {
-			combomodel_clienteFiltro.addElement(c);
-			combomodel_cliente.addElement(c);
+		if (clientes != null){
+			for (Cliente c : clientes) {
+				combomodel_clienteFiltro.addElement(c);
+				combomodel_cliente.addElement(c);
+			}
 		}
 	}
 
@@ -332,14 +364,19 @@ public class Proyecto extends JFrame {
 	 * carga el combo de productos si ya existía, lo borra y recarga
 	 */
 	private void comboProductos() {
-
-		ArrayList<Producto> productos = Dao.todosLosProductos(conn);
+		ArrayList<Producto> productos = null;
+		if (conn == null && cont != null)
+			productos = Dao.todosLosProductos(cont);
+		else
+			productos = Dao.todosLosProductos(conn);
 
 		if (combomodel_producto == null)
 			combomodel_producto = new DefaultComboBoxModel<Producto>();
 
-		for (Producto p : productos) {
-			combomodel_producto.addElement(p);
+		if (productos != null){
+			for (Producto p : productos) {
+				combomodel_producto.addElement(p);
+			}
 		}
 
 	}
@@ -360,7 +397,6 @@ public class Proyecto extends JFrame {
 	}
 
 	private void conectarSGBD() {
-		System.out.println("conectarSGBD()"); // TODO delete log
 
 		// si existía una conexión, la cerramos antes de abrir otra
 		if (conn != null) {
@@ -369,6 +405,9 @@ public class Proyecto extends JFrame {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+		}
+		if (cont != null) {
+			cont.close();
 		}
 
 		switch (dbElegida) {
@@ -379,7 +418,7 @@ public class Proyecto extends JFrame {
 			conn = Dao.getSqliteConnection();
 			break;
 		case Utils.DB4O:
-			conn = Dao.getMysqlConnection(); // TODO change
+			cont = Dao.getDB4OContainer();
 			break;
 		}
 		System.out.println("Cambiando..."); //TODO delete log

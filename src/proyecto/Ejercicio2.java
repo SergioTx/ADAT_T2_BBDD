@@ -4,6 +4,8 @@ import java.sql.Connection;
 
 import javax.swing.JOptionPane;
 
+import com.db4o.ObjectContainer;
+
 import beans.Venta;
 import dao.Dao;
 
@@ -32,4 +34,8 @@ public class Ejercicio2 {
 		return 0;
 	}
 
+	public static int insertarVenta(ObjectContainer cont, Venta v) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
