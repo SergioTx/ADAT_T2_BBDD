@@ -27,7 +27,7 @@ import beans.Venta;
 import proyecto.Utils;
 
 public class Dao {
-	
+
 	private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	public static Connection getMysqlConnection() {
@@ -67,12 +67,12 @@ public class Dao {
 
 		return conn;
 	}
-	
-	public static ObjectContainer getDB4OContainer(){
+
+	public static ObjectContainer getDB4OContainer() {
 		ObjectContainer container = null;
-		
+
 		container = Db4oEmbedded.openFile(Utils.DB4O_DB);
-		
+
 		return container;
 	}
 
@@ -132,7 +132,8 @@ public class Dao {
 	/**
 	 * 
 	 * @param conn
-	 * @param filtroCliente Si no se quiere aplicar filtro, pasar null
+	 * @param filtroCliente
+	 *            Si no se quiere aplicar filtro, pasar null
 	 * @return
 	 */
 	public static ArrayList<Venta> todasLasVentas(Connection conn, Cliente filtroCliente) {
@@ -140,10 +141,9 @@ public class Dao {
 
 		String sql = "SELECT idventa, fechaventa, cantidad, idcliente, idproducto, "
 				+ "clientes.nombre, clientes.direccion, clientes.poblacion, clientes.telef, clientes.nif, productos.id, "
-				+ "productos.descripcion, productos.stockactual, productos.stockminimo, productos.pvp "
-				+ "FROM ventas, clientes, productos " + "WHERE ventas.idcliente = clientes.id "
-				+ "AND ventas.idproducto = productos.id";
-		
+				+ "productos.descripcion, productos.stockactual, productos.stockminimo, productos.pvp " + "FROM ventas, clientes, productos "
+				+ "WHERE ventas.idcliente = clientes.id " + "AND ventas.idproducto = productos.id";
+
 		if (filtroCliente != null)
 			sql += " AND ventas.idcliente = " + filtroCliente.getId();
 
@@ -200,8 +200,7 @@ public class Dao {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-				Cliente c = new Cliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4),
-						rs.getString(5), rs.getString(6));
+				Cliente c = new Cliente(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6));
 				clientes.add(c);
 			}
 		} catch (SQLException e) {
@@ -253,16 +252,16 @@ public class Dao {
 		try {
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, v.getIdventa());
-			if (conn.toString().toLowerCase().contains("sqlite")){
+			if (conn.toString().toLowerCase().contains("sqlite")) {
 				pstmt.setString(2, formatter.format(new Date()));
 			} else {
 				pstmt.setDate(2, new java.sql.Date(new java.util.Date().getTime()));
 			}
-			
+
 			pstmt.setInt(3, v.getCliente().getId());
 			pstmt.setInt(4, v.getProducto().getId());
 			pstmt.setInt(5, v.getCantidad());
-			
+
 			count = pstmt.executeUpdate();
 
 		} catch (SQLException e) {
@@ -365,7 +364,7 @@ public class Dao {
 		return false;
 	}
 
-	//TODO falta actualizar el stock si se borra una venta
+	// TODO falta actualizar el stock si se borra una venta
 	public static boolean borrarVenta(Connection conn, int idVenta) {
 		int count = 0;
 		String sql = "DELETE FROM ventas WHERE idventa = ?";
@@ -394,41 +393,59 @@ public class Dao {
 		return true;
 	}
 
-	
 	/*
-	 * DB4O
-	 * Mismas funciones pero reciben el ObjectContainer en lugar de Connection
+	 * DB4O Mismas funciones pero reciben el ObjectContainer en lugar de Connection
 	 */
-	public static void borrarVenta(ObjectContainer cont, int idSeleccionadoVenta) {
-		// TODO Auto-generated method stub
+
+	// TODO falta actualizar el stock si se borra una venta
+	public static boolean borrarVenta(ObjectContainer cont, int idVenta) {
 		
+		Venta v = new Venta();
+		v.setIdventa(idVenta);
+		cont.delete(v);
+		//mantengo el return boolean para la compatibilidad con las otras funciones
+		return true;
 	}
 
 	public static ArrayList<Venta> todasLasVentas(ObjectContainer cont, Cliente filtroCliente) {
-		ArrayList<Venta> ventas = null;
-		ObjectSet<Venta> set = cont.queryByExample(new Venta()); 
-		while(set.hasNext()){
+		ArrayList<Venta> ventas = new ArrayList<Venta>();
+		ObjectSet<Venta> set = cont.queryByExample(new Venta());
+		while (set.hasNext()) {
 			ventas.add(set.next());
 		}
 		return ventas;
 	}
 
 	public static ArrayList<Cliente> todosLosClientes(ObjectContainer cont) {
-		ArrayList<Cliente> clientes = null;
-		ObjectSet<Cliente> set = cont.queryByExample(new Cliente()); 
-		while(set.hasNext()){
+		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
+		ObjectSet<Cliente> set = cont.queryByExample(new Cliente());
+		while (set.hasNext()) {
 			clientes.add(set.next());
 		}
 		return clientes;
 	}
 
 	public static ArrayList<Producto> todosLosProductos(ObjectContainer cont) {
-		ArrayList<Producto> productos = null;
-		ObjectSet<Producto> set = cont.queryByExample(new Producto()); 
-		while(set.hasNext()){
+		ArrayList<Producto> productos = new ArrayList<Producto>();
+		ObjectSet<Producto> set = cont.queryByExample(new Producto());
+		while (set.hasNext()) {
 			productos.add(set.next());
 		}
 		return productos;
 	}
 
+	public static boolean existeVentaId(ObjectContainer cont, int idventa) {
+		Venta v = new Venta();
+		v.setIdventa(idventa);
+		ObjectSet<Venta> set = cont.queryByExample(new Venta());
+		while (set.hasNext()) {
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean insertarVenta(ObjectContainer cont, Venta v) {
+		cont.store(v);
+		return true;
+	}
 }

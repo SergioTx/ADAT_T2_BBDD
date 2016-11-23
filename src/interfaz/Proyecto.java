@@ -115,14 +115,7 @@ public class Proyecto extends JFrame {
 		contentPane.add(btn_borrar);
 		
 		// prompt con un combo para elegir a qué base conectarse al principio
-		promptComboBox();
-		
-		//TODO delete
-		if (cont != null){
-			Ejercicio1.insertarClientes(cont);
-			Ejercicio1.insertarProductos(cont);
-		}
-		
+		promptComboBox();		
 
 		JLabel lblElegirSgbd = new JLabel("Cambiar SGBD:");
 		lblElegirSgbd.setBounds(10, 11, 92, 14);

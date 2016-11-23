@@ -51,8 +51,6 @@ public class Ejercicio1 {
 		}
 	}
 
-	/////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * lee clientes del archivo XML de clientes
 	 * 
@@ -125,7 +123,6 @@ public class Ejercicio1 {
 	}
 
 	//DB4O
-	//TODO all methods
 	public static void insertarProductos(ObjectContainer cont) {
 		ArrayList<Producto> productos = leerProductos();
 		for (Producto producto : productos) {
@@ -135,7 +132,6 @@ public class Ejercicio1 {
 	}
 
 	public static void insertarClientes(ObjectContainer cont) {
-		// TODO Auto-generated method stub
 		ArrayList<Cliente> clientes = leerClientes();
 		for (Cliente cliente : clientes) {
 			System.out.println(cliente.toString());
