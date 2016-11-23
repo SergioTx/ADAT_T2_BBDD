@@ -4,9 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -31,13 +35,20 @@ import beans.Venta;
 import dao.Dao;
 import proyecto.Ejercicio1;
 import proyecto.Ejercicio2;
-import proyecto.Utils;
 
 public class Proyecto extends JFrame {
 
-	/**
-	 * 
-	 */
+	private final String MYSQL = "MySQL", DB4O = "DB4O", SQLITE = "SQLite";
+
+	private static Properties prop;
+	private final String propFile = "config.properties";
+	// En mayúsculas porque son constantes,
+	// pero no deja declararlas como constantes
+	// porque las lee en tiempo de ejecución del fichero
+	private String XML_PRODUCTOS, XML_CLIENTES, SQLITE_FILE, DB4O_FILE;
+	private String[] DBS = { MYSQL, SQLITE, DB4O };
+
+	// auto añadido para quitar warning
 	private static final long serialVersionUID = 1L;
 
 	private JFrame oThis;
@@ -51,7 +62,6 @@ public class Proyecto extends JFrame {
 	private ObjectContainer cont;
 
 	private String dbElegida;
-	private String[] dbs = { Utils.MYSQL, Utils.SQLITE, Utils.DB4O };
 	private JButton btn_importarProductos;
 	private JTable tabla;
 	private JTextField txt_idventa;
@@ -59,17 +69,17 @@ public class Proyecto extends JFrame {
 
 	private ModeloTablaVentas tablamodel;
 
-	private JComboBox <Cliente> combo_cliente;
-	private JComboBox <Producto> combo_producto;
+	private JComboBox<Cliente> combo_cliente;
+	private JComboBox<Producto> combo_producto;
 	private DefaultComboBoxModel<Producto> combomodel_producto;
 	private DefaultComboBoxModel<Cliente> combomodel_cliente, combomodel_clienteFiltro;
 
 	private JScrollPane scrollPane;
-	
+
 	private int idSeleccionadoVenta = -1;
 
 	private JComboBox<Cliente> combo_filtroClientes;
-	
+
 	private Cliente filtroCliente = null;
 
 	private JButton btn_importarClientes;
@@ -99,6 +109,8 @@ public class Proyecto extends JFrame {
 		oThis = this;
 		setResizable(false);
 
+		cargarPropiedades();
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 573, 437);
 		contentPane = new JPanel();
@@ -113,16 +125,16 @@ public class Proyecto extends JFrame {
 		btn_borrar = new JButton("Borrar venta seleccionada");
 		btn_borrar.setBounds(318, 336, 229, 55);
 		contentPane.add(btn_borrar);
-		
+
 		// prompt con un combo para elegir a qué base conectarse al principio
-		promptComboBox();		
+		promptComboBox();
 
 		JLabel lblElegirSgbd = new JLabel("Cambiar SGBD:");
 		lblElegirSgbd.setBounds(10, 11, 92, 14);
 		contentPane.add(lblElegirSgbd);
 
 		comboBox = new JComboBox<String>();
-		comboBox.setModel(new DefaultComboBoxModel<String>(dbs));
+		comboBox.setModel(new DefaultComboBoxModel<String>(DBS));
 		comboBox.setBounds(107, 8, 82, 20);
 		contentPane.add(comboBox);
 		comboBox.setSelectedItem(new String(dbElegida));
@@ -134,7 +146,7 @@ public class Proyecto extends JFrame {
 		btn_importarProductos = new JButton("Importar Productos");
 		btn_importarProductos.setBounds(417, 7, 130, 23);
 		contentPane.add(btn_importarProductos);
-		
+
 		scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 36, 537, 93);
 		contentPane.add(scrollPane);
@@ -211,17 +223,17 @@ public class Proyecto extends JFrame {
 		btn_importarProductos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (conn == null && cont != null)
-					Ejercicio1.insertarProductos(cont);
+					Ejercicio1.insertarProductos(cont, XML_PRODUCTOS);
 				else
-					Ejercicio1.insertarProductos(conn);
+					Ejercicio1.insertarProductos(conn, XML_PRODUCTOS);
 			}
 		});
 		btn_importarClientes.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (conn == null && cont != null)
-					Ejercicio1.insertarClientes(cont);
+					Ejercicio1.insertarClientes(cont, XML_CLIENTES);
 				else
-					Ejercicio1.insertarClientes(conn);
+					Ejercicio1.insertarClientes(conn, XML_CLIENTES);
 			}
 		});
 		btn_aniadir.addActionListener(new ActionListener() {
@@ -251,7 +263,7 @@ public class Proyecto extends JFrame {
 							resultado = Ejercicio2.insertarVenta(cont, v);
 						else
 							resultado = Ejercicio2.insertarVenta(conn, v);
-						
+
 						String mensaje = "";
 						switch (resultado) {
 						case -1:
@@ -294,7 +306,25 @@ public class Proyecto extends JFrame {
 					idSeleccionadoVenta = (int) tabla.getValueAt(tabla.getSelectedRow(), 0);
 			}
 		});
+	}
 
+	private void cargarPropiedades() {
+		// carga las variables desde el archivo de propiedades
+		prop = new Properties();
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propFile);
+			prop.load(in);
+			in.close();
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		XML_PRODUCTOS = prop.getProperty("XML_PRODUCTOS");
+		XML_CLIENTES = prop.getProperty("XML_CLIENTES");
+		SQLITE_FILE = prop.getProperty("SQLITE_FILE");
+		DB4O_FILE = prop.getProperty("DB4O_FILE");
 	}
 
 	/**
@@ -306,16 +336,16 @@ public class Proyecto extends JFrame {
 			ventas = Dao.todasLasVentas(cont, filtroCliente);
 		else
 			ventas = Dao.todasLasVentas(conn, filtroCliente);
-		
-		//si el botón existe, se dehabilita si no hay elementos en la tabla
-		if (btn_borrar != null){
-			if (ventas != null && ventas.size() <= 0){
+
+		// si el botón existe, se dehabilita si no hay elementos en la tabla
+		if (btn_borrar != null) {
+			if (ventas != null && ventas.size() <= 0) {
 				btn_borrar.setEnabled(false);
 			} else {
 				btn_borrar.setEnabled(true);
 			}
 		}
-		
+
 		if (tablamodel != null)
 			tablamodel.setVentas(ventas);
 		else
@@ -346,7 +376,7 @@ public class Proyecto extends JFrame {
 
 		combomodel_clienteFiltro.addElement(null);// elemento en blanco para que aparezcan todos los clientes
 
-		if (clientes != null){
+		if (clientes != null) {
 			for (Cliente c : clientes) {
 				combomodel_clienteFiltro.addElement(c);
 				combomodel_cliente.addElement(c);
@@ -367,7 +397,7 @@ public class Proyecto extends JFrame {
 		if (combomodel_producto == null)
 			combomodel_producto = new DefaultComboBoxModel<Producto>();
 
-		if (productos != null){
+		if (productos != null) {
 			for (Producto p : productos) {
 				combomodel_producto.addElement(p);
 			}
@@ -381,7 +411,7 @@ public class Proyecto extends JFrame {
 	private void promptComboBox() {
 		// Se mantiene el elegido aunque se cierre la ventana en lugar de dar a OK
 		comboBoxPrompt = new JComboBox<String>();
-		comboBoxPrompt.setModel(new DefaultComboBoxModel<String>(dbs));
+		comboBoxPrompt.setModel(new DefaultComboBoxModel<String>(DBS));
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(new JLabel("Elige un SGBD:"), BorderLayout.NORTH);
 		panel.add(comboBoxPrompt);
@@ -404,18 +434,16 @@ public class Proyecto extends JFrame {
 			cont.close();
 		}
 
-		switch (dbElegida) {
-		case Utils.MYSQL:
+		if (dbElegida.equals(MYSQL)) {
 			conn = Dao.getMysqlConnection();
-			break;
-		case Utils.SQLITE:
-			conn = Dao.getSqliteConnection();
-			break;
-		case Utils.DB4O:
-			cont = Dao.getDB4OContainer();
-			break;
 		}
-		System.out.println("Cambiando..."); //TODO delete log
+		if (dbElegida.equals(SQLITE)) {
+			conn = Dao.getSqliteConnection(SQLITE_FILE);
+		}
+		if (dbElegida.equals(DB4O)) {
+			cont = Dao.getDB4OContainer(DB4O_FILE);
+		}
+
 		comboClientes();
 		comboProductos();
 		cargarTabla(filtroCliente);

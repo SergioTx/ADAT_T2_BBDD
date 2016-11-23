@@ -13,8 +13,6 @@ public class Venta {
 	public Venta() {
 	}
 	
-	
-
 	public Venta(int idventa, Date fechaventa, Cliente cliente, Producto producto, int cantidad) {
 		super();
 		this.idventa = idventa;

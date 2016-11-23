@@ -2,8 +2,6 @@ package proyecto;
 
 import java.sql.Connection;
 
-import javax.swing.JOptionPane;
-
 import com.db4o.ObjectContainer;
 
 import beans.Venta;
@@ -23,9 +21,7 @@ public class Ejercicio2 {
 	 * 
 	 */
 	public static int insertarVenta(Connection conn, Venta v) {
-		int result;
-		boolean existe;
-		
+	
 		if (Dao.existeVentaId(conn, v.getIdventa())){
 			return 0;
 		}

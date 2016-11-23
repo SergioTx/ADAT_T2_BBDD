@@ -50,13 +50,13 @@ public class Dao {
 		return conn;
 	}
 
-	public static Connection getSqliteConnection() {
+	public static Connection getSqliteConnection(String filePath) {
 
 		Connection conn = null;
 
 		SQLiteDataSource dataSource = new SQLiteDataSource();
 		dataSource.setDatabaseName("ejercicio1");
-		dataSource.setUrl("jdbc:sqlite:" + Utils.SQLITE_DB);
+		dataSource.setUrl("jdbc:sqlite:" + filePath);
 
 		try {
 			conn = (Connection) dataSource.getConnection();
@@ -68,10 +68,10 @@ public class Dao {
 		return conn;
 	}
 
-	public static ObjectContainer getDB4OContainer() {
+	public static ObjectContainer getDB4OContainer(String filePath) {
 		ObjectContainer container = null;
 
-		container = Db4oEmbedded.openFile(Utils.DB4O_DB);
+		container = Db4oEmbedded.openFile(filePath);
 
 		return container;
 	}
@@ -393,6 +393,7 @@ public class Dao {
 		return true;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////
 	/*
 	 * DB4O Mismas funciones pero reciben el ObjectContainer en lugar de Connection
 	 */
@@ -409,7 +410,9 @@ public class Dao {
 
 	public static ArrayList<Venta> todasLasVentas(ObjectContainer cont, Cliente filtroCliente) {
 		ArrayList<Venta> ventas = new ArrayList<Venta>();
-		ObjectSet<Venta> set = cont.queryByExample(new Venta());
+		Venta v = new Venta();
+		v.setCliente(filtroCliente);
+		ObjectSet<Venta> set = cont.queryByExample(v);
 		while (set.hasNext()) {
 			ventas.add(set.next());
 		}

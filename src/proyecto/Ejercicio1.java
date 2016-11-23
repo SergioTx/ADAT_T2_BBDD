@@ -4,23 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.db4o.ObjectContainer;
 
@@ -30,38 +19,51 @@ import dao.Dao;
 
 public class Ejercicio1 {
 
-	public static void insertarClientes(Connection conn) {
-		ArrayList<Cliente> clientes = leerClientes();
+	public static void insertarClientes(Connection conn, String xml) {
+		ArrayList<Cliente> clientes = leerClientes(xml);
 		for (Cliente cliente : clientes) {
 			System.out.println(cliente.toString());
 			Dao.insertarCliente(conn, cliente);
 		}
 	}
 
-	/**
-	 * Inserta los clientes del fichero XML en la base de datos
-	 * 
-	 * @param conn
-	 */
-	public static void insertarProductos(Connection conn) {
-		ArrayList<Producto> productos = leerProductos();
+	public static void insertarProductos(Connection conn, String xml) {
+		ArrayList<Producto> productos = leerProductos(xml);
 		for (Producto producto : productos) {
 			System.out.println(producto.toString());
 			Dao.insertarProducto(conn, producto);
 		}
 	}
 
+	// DB4O
+	public static void insertarProductos(ObjectContainer cont, String xml) {
+		ArrayList<Producto> productos = leerProductos(xml);
+		for (Producto producto : productos) {
+			System.out.println(producto.toString());
+			cont.store(producto);
+		}
+	}
+
+	public static void insertarClientes(ObjectContainer cont, String xml) {
+		ArrayList<Cliente> clientes = leerClientes(xml);
+		for (Cliente cliente : clientes) {
+			System.out.println(cliente.toString());
+			cont.store(cliente);
+		}
+	}
+
 	/**
 	 * lee clientes del archivo XML de clientes
 	 * 
+	 * @param xml
 	 * @return ArrayList de Clientes
 	 */
-	public static ArrayList<Cliente> leerClientes() {
+	public static ArrayList<Cliente> leerClientes(String xmlPath) {
 		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
 
 		SAXBuilder builder = new SAXBuilder();
 
-		File file = new File(Utils.XML_CLIENTES);
+		File file = new File(xmlPath);
 		Document document;
 		try {
 			document = (Document) builder.build(file);
@@ -92,12 +94,12 @@ public class Ejercicio1 {
 	 * 
 	 * @return ArrayList de Productos
 	 */
-	public static ArrayList<Producto> leerProductos() {
+	public static ArrayList<Producto> leerProductos(String xmlPath) {
 		ArrayList<Producto> productos = new ArrayList<Producto>();
 
 		SAXBuilder builder = new SAXBuilder();
 
-		File file = new File(Utils.XML_PRODUCTOS);
+		File file = new File(xmlPath);
 		Document document;
 		try {
 			document = (Document) builder.build(file);
@@ -120,22 +122,5 @@ public class Ejercicio1 {
 		}
 
 		return productos;
-	}
-
-	//DB4O
-	public static void insertarProductos(ObjectContainer cont) {
-		ArrayList<Producto> productos = leerProductos();
-		for (Producto producto : productos) {
-			System.out.println(producto.toString());
-			cont.store(producto);
-		}
-	}
-
-	public static void insertarClientes(ObjectContainer cont) {
-		ArrayList<Cliente> clientes = leerClientes();
-		for (Cliente cliente : clientes) {
-			System.out.println(cliente.toString());
-			cont.store(cliente);
-		}
 	}
 }
