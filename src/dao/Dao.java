@@ -1,30 +1,26 @@
 package dao;
 
 import java.sql.Connection;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 
+import org.sqlite.SQLiteDataSource;
+
+import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import org.sqlite.SQLiteDataSource;
-import com.db4o.Db4oEmbedded;
-import com.db4o.ObjectContainer;
 
 import beans.Cliente;
 import beans.Producto;
 import beans.Venta;
-import proyecto.Utils;
 
 public class Dao {
 
