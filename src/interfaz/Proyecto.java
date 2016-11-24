@@ -264,6 +264,8 @@ public class Proyecto extends JFrame {
 						else
 							resultado = Ejercicio2.insertarVenta(conn, v);
 
+						
+						
 						String mensaje = "";
 						switch (resultado) {
 						case -1:
@@ -274,6 +276,9 @@ public class Proyecto extends JFrame {
 							break;
 						case 1:
 							mensaje = "Insertado con éxito.";
+							break;
+						case 2:
+							mensaje = "Insertado con éxito. Stock debajo del mínimo";
 							break;
 						}
 						JOptionPane.showMessageDialog(oThis, mensaje);

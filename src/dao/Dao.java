@@ -21,11 +21,22 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import beans.Cliente;
 import beans.Producto;
 import beans.Venta;
-
+/*
+ * La app está organizada para funcionar pasándole la conexión
+ * Hubiera sido mejor haber abierto y cerrado la conexión cada vez que se hace una consulta en lugar de mantenerla
+ * En lugar de llamar a una función u otra en función de la conexión, habría que pasarle una variable con el nombre
+ * de la base de datos a utilizar e instanciar esa conexión.
+ */
 public class Dao {
 
 	private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
+	//El ODBC está marcado como "deprecated" en Java8
+	//ODBC: http://pabletoreto.blogspot.com.es/2013/02/conectar-java-mysql-utilizando-odbc.html
+	/**
+	 * Conexión con JDBC
+	 * @return Connection
+	 */
 	public static Connection getMysqlConnection() {
 
 		Connection conn = null;
@@ -126,10 +137,8 @@ public class Dao {
 	}
 
 	/**
-	 * 
 	 * @param conn
-	 * @param filtroCliente
-	 *            Si no se quiere aplicar filtro, pasar null
+	 * @param filtroCliente Si no se quiere aplicar filtro, pasar null
 	 * @return
 	 */
 	public static ArrayList<Venta> todasLasVentas(Connection conn, Cliente filtroCliente) {
@@ -227,17 +236,19 @@ public class Dao {
 
 	/**
 	 * Inserta una venta NO COMPRUEBA que exista (sql por medio de claves sí).
-	 * Para comprobar usar existeVentaId()
 	 * 
 	 * @param conn
 	 * @param v
-	 * @return
+	 * @return -1 error
+	 * @return 1 correcto
+	 * @return 2 stockActual menor que el mínimo
 	 */
-	public static boolean insertarVenta(Connection conn, Venta v) {
+	public static int insertarVenta(Connection conn, Venta v) {
 
+		boolean rellenarStock = false;
 		int count = 0;
 		if (!hayStockSuficiente(conn, v.getCantidad(), v.getProducto().getId()))
-			return false;
+			return -1;
 
 		actualizarStock(conn, v.getCantidad(), v.getProducto().getId());
 
@@ -260,10 +271,22 @@ public class Dao {
 
 			count = pstmt.executeUpdate();
 
+			int stactual, stmin;
+			sql = "select stockactual, stockminimo from productos where id = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,v.getIdventa());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				stactual = rs.getInt(1);
+				stmin = rs.getInt(2);
+				if (stactual < stmin)
+					rellenarStock = true;
+			}
+			
 		} catch (SQLException e) {
 			System.err.println("ERROR - al hacer la consulta sql: " + sql);
 			e.printStackTrace();
-			return false;
+			return -1;
 		} finally {
 			try {
 				pstmt.close();
@@ -272,7 +295,11 @@ public class Dao {
 			}
 		}
 
-		return count == 1;
+		if (count == 1 && !rellenarStock)
+			return 1;
+		if (count == 1 && rellenarStock)
+			return 2;
+		return -1;
 	}
 
 	private static void actualizarStock(Connection conn, int cantidad, int id) {
@@ -443,8 +470,9 @@ public class Dao {
 		return false;
 	}
 
-	public static boolean insertarVenta(ObjectContainer cont, Venta v) {
+	//TODO falta que actualice los stocks y los compruebe. Hecho en MySql
+	public static int insertarVenta(ObjectContainer cont, Venta v) {
 		cont.store(v);
-		return true;
+		return 1;
 	}
 }

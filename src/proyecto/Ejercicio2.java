@@ -18,6 +18,7 @@ public class Ejercicio2 {
 	 * @return -1 - No se ha podido insertar la venta
 	 * @return 0 - Existe una venta con ese ID
 	 * @return 1 - Insertada la venta con éxito
+	 * @return 2 - Insertada la venta con éxito y stock por debajo del mínimo
 	 * 
 	 */
 	public static int insertarVenta(Connection conn, Venta v) {
@@ -25,9 +26,15 @@ public class Ejercicio2 {
 		if (Dao.existeVentaId(conn, v.getIdventa())){
 			return 0;
 		}
-		if (Dao.insertarVenta(conn, v))
+		switch (Dao.insertarVenta(conn, v)){
+		case -1:
+			return -1;
+		case 1:
 			return 1;
-		return 0;
+		case 2:
+			return 2;
+		}
+		return -1;
 	}
 
 	/**
@@ -45,9 +52,14 @@ public class Ejercicio2 {
 		if (Dao.existeVentaId(cont, v.getIdventa())){
 			return 0;
 		}
-		if (Dao.insertarVenta(cont, v))
+		switch (Dao.insertarVenta(cont, v)){
+		case -1:
+			return -1;
+		case 1:
 			return 1;
-		
-		return 0;
+		case 2:
+			return 2;
+		}
+		return -1;
 	}
 }
