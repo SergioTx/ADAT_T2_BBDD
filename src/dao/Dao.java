@@ -32,10 +32,11 @@ public class Dao {
 	private static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
 	//El ODBC está marcado como "deprecated" en Java8
-	//ODBC: http://pabletoreto.blogspot.com.es/2013/02/conectar-java-mysql-utilizando-odbc.html
+	//para usar ODBC --> http://pabletoreto.blogspot.com.es/2013/02/conectar-java-mysql-utilizando-odbc.html
+	
 	/**
 	 * Conexión con JDBC
-	 * @return Connection
+	 * @return objeto Connection
 	 */
 	public static Connection getMysqlConnection() {
 
@@ -57,6 +58,11 @@ public class Dao {
 		return conn;
 	}
 
+	/**
+	 * Devuelve la conexión a la base de datos SQLite
+	 * @param filePath ruta al archivo que contiene la base de datos
+	 * @return objeto conexión
+	 */
 	public static Connection getSqliteConnection(String filePath) {
 
 		Connection conn = null;
@@ -75,6 +81,11 @@ public class Dao {
 		return conn;
 	}
 
+	/**
+	 * Devuelve la conexión a la base de datos DB4O
+	 * @param filePath ruta al archivo que contiene la base de datos
+	 * @return objeto ObjectContainer
+	 */
 	public static ObjectContainer getDB4OContainer(String filePath) {
 		ObjectContainer container = null;
 
@@ -137,9 +148,7 @@ public class Dao {
 	}
 
 	/**
-	 * @param conn
-	 * @param filtroCliente Si no se quiere aplicar filtro, pasar null
-	 * @return
+	 * Saca todas las ventas filtrando por cliente. Si recibe NULL como filtro, saca todos
 	 */
 	public static ArrayList<Venta> todasLasVentas(Connection conn, Cliente filtroCliente) {
 		ArrayList<Venta> ventas = new ArrayList<Venta>();
@@ -157,7 +166,6 @@ public class Dao {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
-
 				Venta v;
 				Cliente c = new Cliente();
 				Producto p = new Producto();
@@ -196,6 +204,9 @@ public class Dao {
 		return ventas;
 	}
 
+	/**
+	 * Devuelve todos los clientes de la base de datos (tipo SQL)
+	 */
 	public static ArrayList<Cliente> todosLosClientes(Connection conn) {
 		ArrayList<Cliente> clientes = new ArrayList<Cliente>();
 
@@ -215,6 +226,9 @@ public class Dao {
 		return clientes;
 	}
 
+	/**
+	 * Devuelve todos los clientes de la base de datos (tipo SQL)
+	 */
 	public static ArrayList<Producto> todosLosProductos(Connection conn) {
 		ArrayList<Producto> productos = new ArrayList<Producto>();
 
@@ -237,8 +251,6 @@ public class Dao {
 	/**
 	 * Inserta una venta NO COMPRUEBA que exista (sql por medio de claves sí).
 	 * 
-	 * @param conn
-	 * @param v
 	 * @return -1 error
 	 * @return 1 correcto
 	 * @return 2 stockActual menor que el mínimo
@@ -288,13 +300,13 @@ public class Dao {
 			e.printStackTrace();
 			return -1;
 		} finally {
+			//al cerrar 
 			try {
 				pstmt.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
-
 		if (count == 1 && !rellenarStock)
 			return 1;
 		if (count == 1 && rellenarStock)
@@ -359,27 +371,28 @@ public class Dao {
 	}
 
 	public static boolean existeVentaId(Connection conn, int idventa) {
-		String sql = "SELECT idventa FROM ventas WHERE idventa = " + idventa;
-		Statement stmt = null;
+		String sql = "SELECT idventa FROM ventas WHERE idventa = ?";
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sql);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, idventa);
+			rs = pstmt.executeQuery();
 			if (rs.next()) {
 				// si ya existe, vuelve
 				return true;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return true; // ERROR
+			return false; // ERROR
 		} finally { // cerrar los statement
 			try {
-				stmt.close();
+				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			try {
-				rs.close();
+				pstmt.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -423,7 +436,6 @@ public class Dao {
 
 	// TODO falta actualizar el stock si se borra una venta
 	public static boolean borrarVenta(ObjectContainer cont, int idVenta) {
-		
 		Venta v = new Venta();
 		v.setIdventa(idVenta);
 		cont.delete(v);
