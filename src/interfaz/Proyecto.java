@@ -255,28 +255,24 @@ public class Proyecto extends JFrame {
 					if (v.getIdventa() <= 0)
 						JOptionPane.showMessageDialog(oThis, "La cantidad no puede ser negativa");
 					else {
-						/*
-						 * @return -1 - No se ha podido insertar la venta
-						 * 
-						 * @return 0 - Existe una venta con ese ID
-						 * 
-						 * @return 1 - Insertada la venta con éxito
-						 */
 						int resultado;
-						if (conn == null && cont != null)
+						if (conn == null && cont != null){
 							resultado = Ejercicio2.insertarVenta(cont, v);
-						else
+						}else{
 							resultado = Ejercicio2.insertarVenta(conn, v);
-
+						}
 						
 						
 						String mensaje = "";
 						switch (resultado) {
-						case -1:
+						case -2:
 							mensaje = "Ha ocurrido un error al insertar la venta.";
 							break;
-						case 0:
+						case -1:
 							mensaje = "Ya existe una venta con ese ID.";
+							break;
+						case 0:
+							mensaje = "No hay stock suficiente para la venta";
 							break;
 						case 1:
 							mensaje = "Insertado con éxito.";

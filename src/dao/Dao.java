@@ -249,20 +249,23 @@ public class Dao {
 	}
 
 	/**
-	 * Inserta una venta NO COMPRUEBA que exista (sql por medio de claves sí).
+	 * Inserta una venta NO COMPRUEBA que exista (hay otra función que lo hace, se llama antes).
 	 * 
-	 * @return -1 error
+	 * @return -2 error
+	 * @return 0 no hay stock suficiente
 	 * @return 1 correcto
 	 * @return 2 stockActual menor que el mínimo
 	 */
 	public static int insertarVenta(Connection conn, Venta v) {
-
+		
 		boolean rellenarStock = false;
 		int count = 0;
-		if (!hayStockSuficiente(conn, v.getCantidad(), v.getProducto().getId()))
-			return -1;
-
+		if (!hayStockSuficiente(conn, v.getCantidad(), v.getProducto().getId())){
+			return 0;
+		}
+			
 		actualizarStock(conn, v.getCantidad(), v.getProducto().getId());
+		
 
 		String sql = "INSERT INTO ventas (idventa, fechaventa, idcliente, idproducto, cantidad) VALUES (?,?,?,?,?)";
 
@@ -285,10 +288,11 @@ public class Dao {
 
 			rellenarStock = hayQueRellenarStock(conn, v);
 
+			
 		} catch (SQLException e) {
 			System.err.println("ERROR - al hacer la consulta sql: " + sql);
 			e.printStackTrace();
-			return -1;
+			return -2;
 		} finally {
 			//al cerrar 
 			try {
@@ -297,11 +301,48 @@ public class Dao {
 				e.printStackTrace();
 			}
 		}
-		if (count == 1 && !rellenarStock)
+		System.out.println();
+		if (count == 1 && !rellenarStock){
+			System.out.println("return 1");
 			return 1;
-		if (count == 1 && rellenarStock)
+		}
+			
+		if (count == 1 && rellenarStock){
 			return 2;
-		return -1;
+		}
+		return -2;
+	}
+	
+	private static boolean hayStockSuficiente(Connection conn, int cantidad, int idproducto) {
+
+		String sql = "SELECT stockactual FROM productos WHERE id = ?";
+		int stock = -1;
+
+		PreparedStatement pstmt = null;
+
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, idproducto);
+
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				stock = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			System.err.println("ERROR - al hacer la consulta sql: " + sql);
+			e.printStackTrace();
+			return false;
+		} finally {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println(stock);
+		System.out.println(cantidad);
+
+		return stock > cantidad;
 	}
 
 	private static boolean hayQueRellenarStock(Connection conn, Venta v) {
@@ -357,37 +398,6 @@ public class Dao {
 			}
 		}
 
-	}
-
-	private static boolean hayStockSuficiente(Connection conn, int cantidad, int idproducto) {
-
-		String sql = "SELECT stockactual FROM productos WHERE id = ?";
-		int stock = -1;
-
-		PreparedStatement pstmt = null;
-
-		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, idproducto);
-
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				stock = rs.getInt(1);
-			}
-
-		} catch (SQLException e) {
-			System.err.println("ERROR - al hacer la consulta sql: " + sql);
-			e.printStackTrace();
-			return false;
-		} finally {
-			try {
-				pstmt.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return stock > cantidad;
 	}
 
 	public static boolean existeVentaId(Connection conn, int idventa) {
