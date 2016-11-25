@@ -431,12 +431,14 @@ public class Proyecto extends JFrame {
 		if (conn != null) {
 			try {
 				conn.close();
+				conn = null;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
 		if (cont != null) {
 			cont.close();
+			cont=null;
 		}
 
 		if (dbElegida.equals(MYSQL)) {

@@ -291,6 +291,8 @@ public class Dao {
 			if (rs.next()) {
 				stactual = rs.getInt(1);
 				stmin = rs.getInt(2);
+				System.out.println(stactual);
+				System.out.println(stmin);
 				if (stactual < stmin)
 					rellenarStock = true;
 			}
