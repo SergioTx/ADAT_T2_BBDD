@@ -226,6 +226,8 @@ public class Proyecto extends JFrame {
 					Ejercicio1.insertarProductos(cont, XML_PRODUCTOS);
 				else
 					Ejercicio1.insertarProductos(conn, XML_PRODUCTOS);
+				//después de importar, cargamos el combo de nuevo
+				comboProductos();
 			}
 		});
 		btn_importarClientes.addActionListener(new ActionListener() {
@@ -234,6 +236,8 @@ public class Proyecto extends JFrame {
 					Ejercicio1.insertarClientes(cont, XML_CLIENTES);
 				else
 					Ejercicio1.insertarClientes(conn, XML_CLIENTES);
+				//después de importar, cargamos el combo de nuevo
+				comboClientes();
 			}
 		});
 		btn_aniadir.addActionListener(new ActionListener() {

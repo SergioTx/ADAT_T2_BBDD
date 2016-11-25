@@ -283,20 +283,8 @@ public class Dao {
 
 			count = pstmt.executeUpdate();
 
-			int stactual, stmin;
-			sql = "select stockactual, stockminimo from productos where id = ?";
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1,v.getIdventa());
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next()) {
-				stactual = rs.getInt(1);
-				stmin = rs.getInt(2);
-				System.out.println(stactual);
-				System.out.println(stmin);
-				if (stactual < stmin)
-					rellenarStock = true;
-			}
-			
+			rellenarStock = hayQueRellenarStock(conn, v);
+
 		} catch (SQLException e) {
 			System.err.println("ERROR - al hacer la consulta sql: " + sql);
 			e.printStackTrace();
@@ -314,6 +302,36 @@ public class Dao {
 		if (count == 1 && rellenarStock)
 			return 2;
 		return -1;
+	}
+
+	private static boolean hayQueRellenarStock(Connection conn, Venta v) {
+		int stactual, stmin;
+		String sql = "select stockactual, stockminimo from productos where id = ?";
+		
+		PreparedStatement pstmt = null;
+		try{
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,v.getProducto().getId());
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) { //sólo 1
+				stactual = rs.getInt(1);
+				stmin = rs.getInt(2);
+				System.out.println(stactual);
+				System.out.println(stmin);
+				if (stactual < stmin)
+					return true;
+			}
+		} catch (SQLException e){
+			return false;
+		} finally{
+			//al cerrar 
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 
 	private static void actualizarStock(Connection conn, int cantidad, int id) {
