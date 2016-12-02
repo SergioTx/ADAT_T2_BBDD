@@ -86,6 +86,8 @@ public class Proyecto extends JFrame {
 
 	private JButton btn_borrar;
 
+	private JButton btnVerGrficoDe;
+
 	/**
 	 * Launch the application.
 	 */
@@ -186,23 +188,34 @@ public class Proyecto extends JFrame {
 		panel.add(lblCantidad);
 
 		combo_cliente = new JComboBox<Cliente>();
-		combo_cliente.setModel(combomodel_cliente); // el modelo se carga al elegir la base de datos
+		combo_cliente.setModel(combomodel_cliente); // el modelo se carga al
+													// elegir la base de datos
 		combo_cliente.setBounds(10, 95, 255, 20);
 		panel.add(combo_cliente);
 
 		combo_producto = new JComboBox<Producto>();
 		combo_producto.setBounds(10, 141, 255, 20);
-		combo_producto.setModel(combomodel_producto); // el modelo se carga al elegir la base de datos
+		combo_producto.setModel(combomodel_producto); // el modelo se carga al
+														// elegir la base de
+														// datos
 		panel.add(combo_producto);
 
 		combo_filtroClientes = new JComboBox<Cliente>();
-		combo_filtroClientes.setModel(combomodel_clienteFiltro); // el modelo se carga al elegir la base de datos
+		combo_filtroClientes.setModel(combomodel_clienteFiltro); // el modelo se
+																	// carga al
+																	// elegir la
+																	// base de
+																	// datos
 		combo_filtroClientes.setBounds(417, 137, 130, 20);
 		contentPane.add(combo_filtroClientes);
 
 		JLabel lblFiltrarVentas = new JLabel("Filtrar ventas:");
 		lblFiltrarVentas.setBounds(306, 140, 101, 14);
 		contentPane.add(lblFiltrarVentas);
+
+		btnVerGrficoDe = new JButton("Ver gr\u00E1fico de ventas");
+		btnVerGrficoDe.setBounds(318, 204, 229, 55);
+		contentPane.add(btnVerGrficoDe);
 
 		// LISTENERS
 		comboBox.addActionListener(new ActionListener() {
@@ -226,7 +239,7 @@ public class Proyecto extends JFrame {
 					Ejercicio1.insertarProductos(cont, XML_PRODUCTOS);
 				else
 					Ejercicio1.insertarProductos(conn, XML_PRODUCTOS);
-				//después de importar, cargamos el combo de nuevo
+				// después de importar, cargamos el combo de nuevo
 				comboProductos();
 			}
 		});
@@ -236,7 +249,7 @@ public class Proyecto extends JFrame {
 					Ejercicio1.insertarClientes(cont, XML_CLIENTES);
 				else
 					Ejercicio1.insertarClientes(conn, XML_CLIENTES);
-				//después de importar, cargamos el combo de nuevo
+				// después de importar, cargamos el combo de nuevo
 				comboClientes();
 			}
 		});
@@ -256,13 +269,12 @@ public class Proyecto extends JFrame {
 						JOptionPane.showMessageDialog(oThis, "La cantidad no puede ser negativa");
 					else {
 						int resultado;
-						if (conn == null && cont != null){
+						if (conn == null && cont != null) {
 							resultado = Ejercicio2.insertarVenta(cont, v);
-						}else{
+						} else {
 							resultado = Ejercicio2.insertarVenta(conn, v);
 						}
-						
-						
+
 						String mensaje = "";
 						switch (resultado) {
 						case -2:
@@ -293,7 +305,8 @@ public class Proyecto extends JFrame {
 		});
 		btn_borrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (idSeleccionadoVenta != -1) {// valor por defecto cuando no hay ninguna seleccionada
+				if (idSeleccionadoVenta != -1) {// valor por defecto cuando no
+												// hay ninguna seleccionada
 					if (conn == null && cont != null)
 						Dao.borrarVenta(cont, idSeleccionadoVenta);
 					else
@@ -305,10 +318,20 @@ public class Proyecto extends JFrame {
 		});
 		tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) {
-				// el evento también saltaba al borrar filas y la fila borrada era -1
+				// el evento también saltaba al borrar filas y la fila borrada
+				// era -1
 				// saltaba nullPointerException
 				if (tabla.getSelectedRow() != -1)
 					idSeleccionadoVenta = (int) tabla.getValueAt(tabla.getSelectedRow(), 0);
+			}
+		});
+		/********************* añadido ver grafica ****************/
+		btnVerGrficoDe.addActionListener(new ActionListener() {
+			Grafico g = null;
+
+			public void actionPerformed(ActionEvent arg0) {
+				g = new Grafico(conn);
+				g.setVisible(true);
 			}
 		});
 	}
@@ -356,7 +379,8 @@ public class Proyecto extends JFrame {
 		else
 			tablamodel = new ModeloTablaVentas(ventas);
 		// el modelo avisa a la tabla de que ha cambiado
-		// sin esto no cambia el número de filas de la tabla, aunque sí cambiaba los valores
+		// sin esto no cambia el número de filas de la tabla, aunque sí cambiaba
+		// los valores
 		tablamodel.fireTableDataChanged();
 	}
 
@@ -379,7 +403,9 @@ public class Proyecto extends JFrame {
 		combomodel_cliente.removeAllElements();
 		combomodel_clienteFiltro.removeAllElements();
 
-		combomodel_clienteFiltro.addElement(null);// elemento en blanco para que aparezcan todos los clientes
+		combomodel_clienteFiltro.addElement(null);// elemento en blanco para que
+													// aparezcan todos los
+													// clientes
 
 		if (clientes != null) {
 			for (Cliente c : clientes) {
@@ -414,7 +440,8 @@ public class Proyecto extends JFrame {
 	 * combo box inicial para elegir un SGBD
 	 */
 	private void promptComboBox() {
-		// Se mantiene el elegido aunque se cierre la ventana en lugar de dar a OK
+		// Se mantiene el elegido aunque se cierre la ventana en lugar de dar a
+		// OK
 		comboBoxPrompt = new JComboBox<String>();
 		comboBoxPrompt.setModel(new DefaultComboBoxModel<String>(DBS));
 		JPanel panel = new JPanel(new BorderLayout());
@@ -438,17 +465,25 @@ public class Proyecto extends JFrame {
 		}
 		if (cont != null) {
 			cont.close();
-			cont=null;
+			cont = null;
 		}
 
+		//crea la conexión a la bbdd
+		//el gráfico sólo funciona con bbdd basadas en SQL
 		if (dbElegida.equals(MYSQL)) {
 			conn = Dao.getMysqlConnection();
+			if (btnVerGrficoDe != null)
+				btnVerGrficoDe.setEnabled(true);
 		}
 		if (dbElegida.equals(SQLITE)) {
 			conn = Dao.getSqliteConnection(SQLITE_FILE);
+			if (btnVerGrficoDe != null)
+				btnVerGrficoDe.setEnabled(true);
 		}
 		if (dbElegida.equals(DB4O)) {
 			cont = Dao.getDB4OContainer(DB4O_FILE);
+			if (btnVerGrficoDe != null)
+				btnVerGrficoDe.setEnabled(false);
 		}
 
 		comboClientes();

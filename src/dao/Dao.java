@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.sqlite.SQLiteDataSource;
 
@@ -516,5 +517,51 @@ public class Dao {
 	public static int insertarVenta(ObjectContainer cont, Venta v) {
 		cont.store(v);
 		return 1;
+	}
+	
+	/*-----------------------------------------------------------------------*/
+	public static HashMap<String,Integer> dameObjetoCantidadVendida(Connection conn){
+		HashMap<String,Integer> hash = new HashMap<String,Integer>();
+		
+		String sql = "SELECT descripcion, sum(cantidad) FROM ventas,productos WHERE idproducto = id GROUP BY idproducto";
+		
+		//statement normal porque la consulta no va a cambiar
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				hash.put(rs.getString(1), rs.getInt(2));
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return hash;
+	}
+	
+	/**
+	* Devuelve la cantidad de veces que cada cliente ha hecho una venta y el nombre de dicho cliente
+	*/
+	public static HashMap<String,Integer> dameClientesVentas(Connection conn){
+		HashMap<String,Integer> hash = new HashMap<String,Integer>();
+		
+		String sql = "SELECT nombre, count(idventa) FROM ventas,clientes WHERE idcliente = id GROUP BY idcliente";
+		
+		//statement normal porque la consulta no va a cambiar
+		Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(sql);
+			while (rs.next()) {
+				hash.put(rs.getString(1), rs.getInt(2));
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return hash;
 	}
 }
