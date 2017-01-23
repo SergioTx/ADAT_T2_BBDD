@@ -556,7 +556,6 @@ public class Dao {
 			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next()) {
 				hash.put(rs.getString(1), rs.getInt(2));
-				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

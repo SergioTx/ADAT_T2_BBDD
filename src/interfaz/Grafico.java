@@ -164,8 +164,7 @@ public class Grafico extends JFrame {
 
 					if (fc.showOpenDialog(getContentPane()) == JFileChooser.APPROVE_OPTION) {
 						String filepath = fc.getSelectedFile().getAbsolutePath();
-						ChartUtilities.saveChartAsJPEG(new File(filepath + File.separator + "grafico.jpg"), chart, 500,
-								500);
+						ChartUtilities.saveChartAsJPEG(new File(filepath + File.separator + "grafico.jpg"), chart, 500, 500);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.3.1.final using JasperReports Library version 6.3.1  -->
+<!-- 2017-01-19T13:09:41 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="03269805-c488-4808-95f0-b5cff19b33c0">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="SQLite"/>
+	<subDataset name="Dataset1" uuid="4724cb1f-4b1d-4a3c-be7b-9f837f7fe293">
+		<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter "/>
+		<queryString language="SQL">
+			<![CDATA[select * from clientes]]>
+		</queryString>
+		<field name="ID" class="java.lang.Integer"/>
+		<field name="NOMBRE" class="java.lang.String"/>
+		<field name="DIRECCION" class="java.lang.String"/>
+		<field name="POBLACION" class="java.lang.String"/>
+		<field name="TELEF" class="java.lang.String"/>
+		<field name="NIF" class="java.lang.String"/>
+	</subDataset>
+	<queryString language="SQL">
+		<![CDATA[select * from clientes]]>
+	</queryString>
+	<field name="id" class="java.lang.Object"/>
+	<field name="nombre" class="java.lang.Object"/>
+	<field name="direccion" class="java.lang.Object"/>
+	<field name="poblacion" class="java.lang.Object"/>
+	<field name="telef" class="java.lang.Object"/>
+	<field name="nif" class="java.lang.Object"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="81" splitType="Stretch">
+			<staticText>
+				<reportElement key="" mode="Opaque" x="-20" y="0" width="595" height="81" forecolor="#4400FF" backcolor="#D1D1D1" uuid="32e6d1cf-e10c-4fc4-b4ab-413ead0956b8"/>
+				<box padding="5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="26"/>
+				</textElement>
+				<text><![CDATA[Informe 1]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="30" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="30" splitType="Stretch">
+			<textField>
+				<reportElement x="-20" y="0" width="100" height="30" uuid="af32af5a-b874-4e7c-9c1d-f1582dc89c3e"/>
+				<textFieldExpression><![CDATA["ID"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="0" width="100" height="30" uuid="0fd77cfa-5afa-4e65-9b36-e36ad3b6a94c"/>
+				<textFieldExpression><![CDATA["NOMBRE"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="0" width="100" height="30" uuid="c1310e1f-2fb2-42dc-93b4-fadc342ff9f0"/>
+				<textFieldExpression><![CDATA["DIRECCION"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="0" width="100" height="30" uuid="92cb89eb-6949-40af-b879-c73ebcadad1e"/>
+				<textFieldExpression><![CDATA["POBLACION"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="380" y="0" width="100" height="30" uuid="3aad0d9f-6c3b-4f6c-8ed7-eb134acc76f2"/>
+				<textFieldExpression><![CDATA["TELÉFONO"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="480" y="0" width="100" height="30" uuid="b43e14b1-adf2-413f-aceb-bc86c5cdf113"/>
+				<textFieldExpression><![CDATA["DNI"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="50" splitType="Stretch">
+			<textField>
+				<reportElement x="-20" y="0" width="100" height="30" uuid="b8a42f41-a7ca-4a22-9ca2-8ecb2ebb879a"/>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="80" y="1" width="100" height="30" uuid="ddd80766-d5a5-46c8-983b-fe7a0332ce4b"/>
+				<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="180" y="1" width="100" height="30" uuid="7aa18a40-ebab-4dcc-878a-cc31ca439926"/>
+				<textFieldExpression><![CDATA[$F{direccion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="0" width="100" height="30" uuid="7653cf8c-92a1-4e4c-b51d-983f6a282c46"/>
+				<textFieldExpression><![CDATA[$F{poblacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="380" y="1" width="100" height="30" uuid="875e79e6-0519-4174-bd6b-7004bf7c2ec9"/>
+				<textFieldExpression><![CDATA[$F{telef}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="480" y="1" width="100" height="30" uuid="226fe9e1-aa9f-4460-8dcd-ce042479d100"/>
+				<textFieldExpression><![CDATA[$F{nif}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

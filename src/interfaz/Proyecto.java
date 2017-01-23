@@ -4,17 +4,20 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,12 +30,20 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jfree.chart.ChartUtilities;
+
 import com.db4o.ObjectContainer;
 
 import beans.Cliente;
 import beans.Producto;
 import beans.Venta;
 import dao.Dao;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 import proyecto.Ejercicio1;
 import proyecto.Ejercicio2;
 
@@ -121,11 +132,11 @@ public class Proyecto extends JFrame {
 		contentPane.setLayout(null);
 
 		JButton btn_aniadir = new JButton("A\u00F1adir nueva");
-		btn_aniadir.setBounds(318, 270, 229, 55);
+		btn_aniadir.setBounds(318, 296, 229, 42);
 		contentPane.add(btn_aniadir);
 
 		btn_borrar = new JButton("Borrar venta seleccionada");
-		btn_borrar.setBounds(318, 336, 229, 55);
+		btn_borrar.setBounds(318, 349, 229, 42);
 		contentPane.add(btn_borrar);
 
 		// prompt con un combo para elegir a qué base conectarse al principio
@@ -214,8 +225,12 @@ public class Proyecto extends JFrame {
 		contentPane.add(lblFiltrarVentas);
 
 		btnVerGrficoDe = new JButton("Ver gr\u00E1fico de ventas");
-		btnVerGrficoDe.setBounds(318, 204, 229, 55);
+		btnVerGrficoDe.setBounds(318, 243, 229, 42);
 		contentPane.add(btnVerGrficoDe);
+		
+		JButton btnReport = new JButton("Generar informe");
+		btnReport.setBounds(318, 190, 229, 42);
+		contentPane.add(btnReport);
 
 		// LISTENERS
 		comboBox.addActionListener(new ActionListener() {
@@ -332,6 +347,29 @@ public class Proyecto extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				g = new Grafico(conn);
 				g.setVisible(true);
+			}
+		});
+		/********************* añadido generar informes ****************/
+		btnReport.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int num = 1; //por defecto, el primer informe
+				String str = JOptionPane.showInputDialog("Introduce el número de informe que quieres generar (1-3):");
+				
+				try{
+					int num2 = Integer.parseInt(str);
+					num = num2;
+				} catch (NumberFormatException e) {
+					JOptionPane.showMessageDialog(null,"No es un número válido. Generando informe 1...");
+					num = 1;
+				}
+
+				try {
+					JasperReport report = JasperCompileManager.compileReport("Informe" + num + ".jrxml");
+					JasperPrint print = JasperFillManager.fillReport(report,null,Dao.getSqliteConnection(SQLITE_FILE));
+					JasperExportManager.exportReportToPdfFile(print,"informes/informe.pdf");
+				} catch (JRException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	}
